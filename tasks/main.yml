@@ -1,0 +1,78 @@
+---
+
+- name: Create default A record for Server
+  community.general.cloudflare_dns:
+    api_token: "{{ cloudflare_api_token | default(omit) }}"
+    account_email: "{{ cloudflare_account_email | default(omit) }}"
+    account_api_key: "{{ cloudflare_account_api_key | default(omit) }}"
+    record: "{{ inventory_hostname | regex_replace('(-\\w*)*$','') | regex_replace('.' + cloudflare_dns_defaults.zone,'') }}"
+    type: "A"
+    value: "{{ ansible_default_ipv4.address }}"
+    zone: "{{ cloudflare_dns_defaults.zone }}"
+  when: cloudflare_dns_clean_dns_entries is defined and not cloudflare_dns_clean_dns_entries
+
+- name: Create a record using api token
+  community.general.cloudflare_dns:
+    api_token: "{{ cloudflare_api_token | default(omit) }}"
+    account_email: "{{ cloudflare_account_email | default(omit) }}"
+    account_api_key: "{{ cloudflare_account_api_key | default(omit) }}"
+    algorithm: "{{ item.algorithm | default(omit) }}"
+    cert_usage: "{{ item.cert_usage | default(omit) }}"
+    hash_type: "{{ item.hash_type | default(omit) }}"
+    key_tag: "{{ item.key_tag | default(omit) }}"
+    port: "{{ item.port | default(omit )}}"
+    priority: "{{ item.priority | default(omit) }}"
+    proto: "{{ item.proto | default(omit) }}"
+    proxied: "{{ item.proxied | default(cloudflare_dns_defaults.proxied) }}"
+    record: "{{ item.record }}"
+    selector: "{{ item.selector | default(omit) }}"
+    service: "{{ item.service | default(omit) }}"
+    solo: "{{ item.solo | default(omit) }}"
+    state: "{{ item.state | default(cloudflare_dns_defaults.state|default('present')) }}"
+    timeout: "{{ item.timeout | default(cloudflare_dns_defaults.timeout) }}"
+    ttl: "{{ item.ttl | default(cloudflare_dns_defaults.ttl) }}"
+    type: "{{ item.type | upper | default('A') }}"
+    value: "{{ item.value if item.value is defined else ansible_default_ipv4.address }}"
+    weight: "{{ item.weigth | default(cloudflare_dns_defaults.weight| default('1' | int)) }}"
+    zone: "{{ item.zone | default(cloudflare_dns_defaults.zone) }}"
+  with_items: "{{ cloudflare_dns_entries }}"
+  when: cloudflare_dns_entries | default([]) and cloudflare_dns_entries | length > 0 and ( cloudflare_dns_clean_dns_entries is defined and not cloudflare_dns_clean_dns_entries)
+
+- name: Delete default A record for Server "{{ inventory_hostname }}"
+  community.general.cloudflare_dns:
+    api_token: "{{ cloudflare_api_token | default(omit) }}"
+    account_email: "{{ cloudflare_account_email | default(omit) }}"
+    account_api_key: "{{ cloudflare_account_api_key | default(omit) }}"
+    record: "{{ inventory_hostname | regex_replace('(-\w*)*$', '') | regex_replace('.' + cloudflare_dns_defaults.zone, '') }}"
+    type: "A"
+    value: "{{ ansible_default_ipv4.address }}"
+    zone: "{{ cloudflare_dns_defaults.zone }}"
+    state: absent
+  when: cloudflare_dns_clean_dns_entries is defined and cloudflare_dns_clean_dns_entries
+
+- name: Delete DNS records using api token {{ inventory_hostname }}
+  community.general.cloudflare_dns:
+    api_token: "{{ cloudflare_api_token | default(omit) }}"
+    account_email: "{{ cloudflare_account_email | default(omit) }}"
+    account_api_key: "{{ cloudflare_account_api_key | default(omit) }}"
+    algorithm: "{{ item.algorithm | default(omit) }}"
+    cert_usage: "{{ item.cert_usage | default(omit) }}"
+    hash_type: "{{ item.hash_type | default(omit) }}"
+    key_tag: "{{ item.key_tag | default(omit) }}"
+    port: "{{ item.port | default(omit) }}"
+    priority: "{{ item.priority | default(omit) }}"
+    proto: "{{ item.proto | default(omit) }}"
+    proxied: "{{ item.proxied | default(cloudflare_dns_defaults.proxied) }}"
+    record: "{{ item.record }}"
+    selector: "{{ item.selector | default(omit) }}"
+    service: "{{ item.service | default(omit) }}"
+    solo: "{{ item.solo | default(omit) }}"
+    state: absent
+    timeout: "{{ item.timeout | default(cloudflare_dns_defaults.timeout )}}"
+    ttl: "{{ item.ttl | default(cloudflare_dns_defaults.ttl) }}"
+    type: "{{ item.type | upper | default('A') }}"
+    value: "{{ item.value if item.value is defined else ansible_default_ipv4.address }}"
+    weight: "{{ item.weigth | default(cloudflare_dns_defaults.weight| default('1'|int))}}"
+    zone: "{{ item.zone | default(cloudflare_dns_defaults.zone) }}"
+  with_items: "{{ cloudflare_dns_entries }}"
+  when: cloudflare_dns_entries | default([]) and cloudflare_dns_entries | length > 0 and ( cloudflare_dns_clean_dns_entries is defined and cloudflare_dns_clean_dns_entries)

@@ -1,0 +1,20 @@
+---
+# defaults file for cloudflare-dns
+cloudflare_api_token: ""
+cloudflare_account_email: ""
+cloudflare_account_api_key: ""
+
+cloudflare_dns_clean_dns_entries: false
+
+cloudflare_dns_defaults:
+  zone: ""
+  state: present
+  timeout: 30
+  ttl: 1
+  proxied: false
+
+cloudflare_dns_entries: []
+  # - zone: ""
+  #   record: ""
+  #   type: ""
+  #   value: ""
